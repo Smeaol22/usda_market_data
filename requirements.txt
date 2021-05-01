@@ -1,3 +1,6 @@
 #install
 pandas
 requests
+html5lib
+lxml
+BeautifulSoup4

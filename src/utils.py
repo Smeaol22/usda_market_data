@@ -3,6 +3,29 @@ import pandas as pd
 from src.error import UsdaMarketInternalError
 
 
+def extract_html_table_to_df(report_bytes_content):
+    """
+        This function is useful to extract table from html pages (bytes)
+    Args:
+        report_bytes_content (bytes):
+
+    Returns:
+        (dataframe):
+    """
+
+    inline_report = report_bytes_content.split(b'\n')
+    is_inside_table = False
+    for line_report in inline_report:
+        if line_report[1:3] == 'aa':
+            if is_inside_table is False:
+                a = 1
+                is_inside_table = True
+            else:
+                b = 1
+                is_inside_table = False
+    return True
+
+
 def convert_report_to_df(report_bytes_content, column_line=None, column=None, missed_lines=None):
     """
         This function is useful to convert report into a dataframe

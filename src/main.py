@@ -1,3 +1,4 @@
+import pandas as pd
 import requests
 
 from src.conf import UsdaMarketUrl
@@ -18,3 +19,31 @@ def retrieve_all_published_reports():
         raise UsdaMarketRequestError(
             f"Request failed to retrieve all published reports with code {response.status_code}")
     return published_reports_info_df
+
+
+def retrieve_published_reports_by_criteria(report_type, nb_df_limit=100):
+    """
+        Retrieve all published report references using criteria:
+            - report_type (see ReportType in conf.py)
+
+    Args:
+        report_type ():
+        nb_df_limit (int):
+
+    Returns:
+
+    """
+
+    reports_info_frames = []
+    try:
+        for page_number in range(0, nb_df_limit):
+            build_query = UsdaMarketUrl.SEARCH_QUERY.format(field_slug_id_value='', name='', field_slug_title_value='',
+                                                            field_published_date_value='',
+                                                            field_report_date_end_value='',
+                                                            field_api_market_types_target_id=report_type['target_id'],
+                                                            page_number=page_number)
+            reports_info_frames += pd.read_html(build_query)
+    except ValueError as err:
+        if err.args[0] == 'No tables found':
+            pass
+    return pd.concat(reports_info_frames)
