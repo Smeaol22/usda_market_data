@@ -1,5 +1,3 @@
-from src.conf import ReportType
-from src.main import retrieve_published_reports_by_criteria
+from src.production_cost import list_all_cost_production_url, ProductionCostStates
 
-# retrieve_all_published_reports()
-retrieve_published_reports_by_criteria(ReportType.PRODUCTION_COST)
+list_all_cost_production_url(ProductionCostStates.illinois, start_date=None, end_date=None)
