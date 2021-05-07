@@ -1,8 +1,10 @@
+from datetime import datetime
+
 import pandas as pd
 import requests
 
 from src.conf import UsdaMarketUrl
-from src.error import UsdaMarketRequestError
+from src.error import UsdaMarketRequestError, ErrorCode
 from src.utils import convert_report_to_df, retrieve_reports_url_in_html
 
 
@@ -17,7 +19,8 @@ def retrieve_all_published_reports():
         published_reports_info_df = convert_report_to_df(response.content, column_line=3, missed_lines=[0, 1, 2, 3])
     else:
         raise UsdaMarketRequestError(
-            f"Request failed to retrieve all published reports with code {response.status_code}")
+            f"Request failed to retrieve all published reports with code {response.status_code}",
+            ErrorCode.REQUEST_SUBMISSION_ERROR)
     return published_reports_info_df
 
 
@@ -35,7 +38,6 @@ def retrieve_published_reports_by_criteria(report_type, field_slug_title_value='
         (dataframe): dataframe with all information extract in the table from usda request pages
     """
 
-    # field_report_date_end_value = datetime.fromtimestamp(field_report_date_end_value).strftime("%Y-%m-%d")
     reports_info_frames = []
     try:
         for page_number in range(0, nb_df_limit):
@@ -46,6 +48,8 @@ def retrieve_published_reports_by_criteria(report_type, field_slug_title_value='
                                                             field_api_market_types_target_id=report_type['target_id'],
                                                             page_number=page_number)
             table_df = pd.read_html(build_query)
+            table_df[0]['Report Date'] = pd.Series(
+                [datetime.timestamp(datetime.strptime(date, "%Y-%m-%d")) for date in table_df[0]['Report Date']])
             table_df[0]['Document'] = pd.Series(retrieve_reports_url_in_html(build_query))
             reports_info_frames += table_df
     except ValueError as err:
