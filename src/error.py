@@ -12,3 +12,4 @@ class UsdaMarketInternalError(Exception):
 
 class ErrorCode(enumerate):
     CONVERSION_ERROR = 'CONVERSION_ERROR'
+    REQUEST_SUBMISSION_ERROR = 'REQUEST_SUBMISSION_ERROR'

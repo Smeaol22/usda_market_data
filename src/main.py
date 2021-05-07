@@ -24,7 +24,8 @@ def retrieve_all_published_reports():
     return published_reports_info_df
 
 
-def retrieve_published_reports_by_criteria(report_type, field_slug_title_value='', nb_df_limit=100):
+def retrieve_published_reports_by_criteria(report_type, field_slug_title_value='', start_date=None, end_date=None,
+                                           nb_df_limit=100):
     """
         Retrieve all published report references using criteria:
             - report_type (see ReportType in conf.py)
@@ -32,6 +33,8 @@ def retrieve_published_reports_by_criteria(report_type, field_slug_title_value='
     Args:
         report_type (ReportType): type of the report
         field_slug_title_value (str): the slug name , more information on usda website
+        start_date (timestamp): start date to retrieve report (if None search all report in past)
+        end_date (timestamp): last date to retrieve report (if None search until today)
         nb_df_limit (int): limit maximum of page to open
 
     Returns:
@@ -55,4 +58,9 @@ def retrieve_published_reports_by_criteria(report_type, field_slug_title_value='
     except ValueError as err:
         if err.args[0] == 'No tables found':
             pass
-    return pd.concat(reports_info_frames)
+    dataframe_result = pd.concat(reports_info_frames)
+    if start_date is not None:
+        dataframe_result = dataframe_result[dataframe_result['Report Date'] >= start_date]
+    if end_date is not None:
+        dataframe_result = dataframe_result[dataframe_result['Report Date'] <= end_date]
+    return dataframe_result
