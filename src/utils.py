@@ -3,29 +3,6 @@ import pandas as pd
 from src.error import UsdaMarketInternalError
 
 
-def extract_html_table_to_df(report_bytes_content):
-    """
-        This function is useful to extract table from html pages (bytes)
-    Args:
-        report_bytes_content (bytes):
-
-    Returns:
-        (dataframe):
-    """
-
-    inline_report = report_bytes_content.split(b'\n')
-    is_inside_table = False
-    for line_report in inline_report:
-        if line_report[1:3] == 'aa':
-            if is_inside_table is False:
-                a = 1
-                is_inside_table = True
-            else:
-                b = 1
-                is_inside_table = False
-    return True
-
-
 def convert_report_to_df(report_bytes_content, column_line=None, column=None, missed_lines=None):
     """
         This function is useful to convert report into a dataframe
@@ -71,7 +48,9 @@ def extract_element_from_inline_bytes(line_report):
     Returns:
         (list): string list of line_report elements
     """
-    elt_list = [elt for elt in str(line_report).split('  ') if elt != '']
+    str_line_report = str(line_report).replace(')', ') ')
+    elt_list = [elt for elt in str_line_report.split('  ') if elt != '']
+
     elt_list_0 = elt_list[0][2:]
     if elt_list_0 == '':
         elt_list = elt_list[1:]
@@ -79,3 +58,4 @@ def extract_element_from_inline_bytes(line_report):
         elt_list[0] = elt_list_0
     elt_list[-1] = elt_list[-1][0:-1]
     return elt_list
+
