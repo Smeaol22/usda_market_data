@@ -3,7 +3,7 @@ import requests
 
 from src.conf import UsdaMarketUrl
 from src.error import UsdaMarketRequestError
-from src.utils import convert_report_to_df
+from src.utils import convert_report_to_df, retrieve_reports_url_in_html
 
 
 def retrieve_all_published_reports():
@@ -21,8 +21,7 @@ def retrieve_all_published_reports():
     return published_reports_info_df
 
 
-def retrieve_published_reports_by_criteria(report_type, field_slug_title_value='', field_published_date_value=None,
-                                           field_report_date_end_value=None, nb_df_limit=100):
+def retrieve_published_reports_by_criteria(report_type, field_slug_title_value='', nb_df_limit=100):
     """
         Retrieve all published report references using criteria:
             - report_type (see ReportType in conf.py)
@@ -30,32 +29,25 @@ def retrieve_published_reports_by_criteria(report_type, field_slug_title_value='
     Args:
         report_type (ReportType): type of the report
         field_slug_title_value (str): the slug name , more information on usda website
-        field_published_date_value (timestamp):
-        field_report_date_end_value (timestamp):
-        nb_df_limit (int):
+        nb_df_limit (int): limit maximum of page to open
 
     Returns:
-
+        (dataframe): dataframe with all information extract in the table from usda request pages
     """
-    if field_published_date_value is None:
-        field_published_date_value = ''
-    else:
-        field_published_date_value = 'aaa'
 
-    if field_report_date_end_value is None:
-        field_report_date_end_value = ''
-    else:
-        field_report_date_end_value = 'aa'
+    # field_report_date_end_value = datetime.fromtimestamp(field_report_date_end_value).strftime("%Y-%m-%d")
     reports_info_frames = []
     try:
         for page_number in range(0, nb_df_limit):
-            build_query = UsdaMarketUrl.SEARCH_QUERY.format(field_slug_id_value='', name='',
-                                                            field_slug_title_value=field_slug_title_value,
-                                                            field_published_date_value=field_published_date_value,
-                                                            field_report_date_end_value=field_report_date_end_value,
+            build_query = UsdaMarketUrl.SEARCH_QUERY.format(field_slug_id_value='', name=field_slug_title_value,
+                                                            field_slug_title_value='',
+                                                            field_published_date_value='',
+                                                            field_report_date_end_value='',
                                                             field_api_market_types_target_id=report_type['target_id'],
                                                             page_number=page_number)
-            reports_info_frames += pd.read_html(build_query)
+            table_df = pd.read_html(build_query)
+            table_df[0]['Document'] = pd.Series(retrieve_reports_url_in_html(build_query))
+            reports_info_frames += table_df
     except ValueError as err:
         if err.args[0] == 'No tables found':
             pass
