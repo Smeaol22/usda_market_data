@@ -1,5 +1,4 @@
 import pandas as pd
-import requests
 
 from src.conf import ReportType
 from src.main import retrieve_published_reports_by_criteria
@@ -25,18 +24,10 @@ def list_all_cost_production_url(production_cost_state, start_date=None, end_dat
     """
 
     dataframe_result = retrieve_published_reports_by_criteria(ReportType.PRODUCTION_COST,
-                                                              field_slug_title_value=ReportType.PRODUCTION_COST,
-                                                              field_published_date_value=start_date,
-                                                              field_report_date_end_value=end_date)
+                                                              field_slug_title_value=production_cost_state)
+    for row in dataframe_result.iterrows():
+        build_query = row
     return False
-
-
-def test_extract_data_from_df():
-    url_adress = "https://mymarketnews.ams.usda.gov/filerepo/sites/default/files/3195/2017-11-09/399537/GX_GR21020171109.TXT"
-    response = requests.get(url_adress)
-    if response.status_code >= 200 or response.status_code < 300:
-        extract_report_to_df(response.content, date='2017-11-09')
-        return True
 
 
 def extract_report_to_df(report_bytes_content, date, columns=['product', 'offer', 'average', 'date'],

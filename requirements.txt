@@ -3,4 +3,5 @@ pandas
 requests
 html5lib
 lxml
+urllib3
 BeautifulSoup4

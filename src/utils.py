@@ -1,6 +1,8 @@
 import pandas as pd
+import urllib3
+from bs4 import BeautifulSoup
 
-from src.error import UsdaMarketInternalError
+from src.error import UsdaMarketInternalError, ErrorCode
 
 
 def convert_report_to_df(report_bytes_content, column_line=None, column=None, missed_lines=None):
@@ -16,9 +18,9 @@ def convert_report_to_df(report_bytes_content, column_line=None, column=None, mi
         (dataframe): input report_bytes as dataframe
     """
     if column_line is None and column is None:
-        raise UsdaMarketInternalError("column_line or column should be defined")
+        raise UsdaMarketInternalError("column_line or column should be defined", ErrorCode.CONVERSION_ERROR)
     if column_line is not None and column is not None:
-        raise UsdaMarketInternalError("column_line and column should not be both defined")
+        raise UsdaMarketInternalError("column_line and column should not be both defined", ErrorCode.CONVERSION_ERROR)
     inline_report = report_bytes_content.split(b'\n')
     if column_line is not None:
         missed_lines = missed_lines + [column_line]
@@ -59,3 +61,19 @@ def extract_element_from_inline_bytes(line_report):
     elt_list[-1] = elt_list[-1][0:-1]
     return elt_list
 
+
+def retrieve_reports_url_in_html(query_url):
+    """
+        This function is useful to retrieve reports url from query_url
+    Args:
+        query_url (str): url request to retrieve all reports
+
+    Returns:
+        (list): list of reports url sort by appearance order
+
+    """
+
+    http = urllib3.PoolManager()
+    response = http.request('GET', query_url)
+    soup = BeautifulSoup(response.data, 'html.parser')
+    return [x.find_all('a')[1].attrs['href'] for x in soup.find_all('tr') if x.find_all('a').__len__() < 3]
