@@ -67,7 +67,7 @@ def extract_cost_report_to_df(report_url, date, columns=None,
         elt = extract_element_from_inline_bytes(line_report)
         if start_signal_detected and elt[0].lower().startswith(end_signal):
             break
-        if start_signal_detected and elt[0] != '\\r':
+        if start_signal_detected and elt[0] not in ['\\r', 'Change\\r']:
             for index, label in enumerate(columns):
                 if label == 'date':
                     report_data[label] = report_data[label] + [date]
